@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>敏感个人信息判断助手</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+
+    .container {
+      max-width: 700px;
+      background-color: #fff;
+      margin: 0 auto;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: #fdfdfd;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #409eff;
+      outline: none;
+    }
+
+    button {
+      display: block;
+      margin-top: 2rem;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #409eff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #66b1ff;
+    }
+
+    #answer {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f0f4f8;
+      border-left: 5px solid #409eff;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      font-size: 1rem;
+      min-height: 100px;
+      font-family: 'Courier New', monospace;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 敏感个人信息判断助手</h1>
+    
+    <label for="data_item">数据项：</label>
+    <input type="text" id="data_item" placeholder="例如：身份证号、手机号等" />
+
+    <label for="usage">使用场景：</label>
+    <textarea id="usage" rows="5" placeholder="描述你在什么业务场景中使用此数据，例如注册验证、广告推荐等"></textarea>
+
+    <button id="askBtn">🚀 提交分析</button>
+
+    <div id="answer">👈 输入后将在此显示判断结果</div>
+  </div>
+
+  <script>
+    const askBtn = document.getElementById("askBtn");
+    const dataItemInput = document.getElementById("data_item");
+    const usageInput = document.getElementById("usage");
+    const answerDiv = document.getElementById("answer");
+
+    askBtn.onclick = async () => {
+      const data_item = dataItemInput.value.trim();
+      const usage = usageInput.value.trim();
+
+      if (!data_item || !usage) {
+        alert("请填写数据项和使用场景");
+        return;
+      }
+
+      answerDiv.textContent = "⏳ 正在分析中，请稍候...";
+
+      try {
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data_item, usage })
+        });
+        const result = await response.json();
+        if (result.error) {
+          answerDiv.textContent = "❌ 错误：" + result.error;
+        } else {
+          answerDiv.textContent = result.answer;
+        }
+      } catch (error) {
+        answerDiv.textContent = "🚫 请求失败：" + error.message;
+      }
+    };
+  </script>
+</body>
+</html>
