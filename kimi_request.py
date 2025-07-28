@@ -24,7 +24,9 @@ HEADERS = {
 def call_kimi(prompt: str, model="moonshot-v1-32k", temperature=0.7) -> str:
     payload = {
         "model": model,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
         "temperature": temperature,
         "stream": False
     }
@@ -32,7 +34,18 @@ def call_kimi(prompt: str, model="moonshot-v1-32k", temperature=0.7) -> str:
     try:
         response = requests.post(KIMI_API_URL, headers=HEADERS, json=payload)
         response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"].strip()
+        result = response.json()["choices"][0]["message"]["content"].strip()
+
+        # 如果输出中包含“不确定”或“未提及”，触发补充提示
+        if any(term in result for term in ["不确定", "未提及", "无法判断"]):
+            followup = prompt + "\n\n请在已有基础上尝试提供进一步判断，必要时参考数据泄露场景下的风险，并给出更清晰的判断结论。"
+            payload["messages"] = [{"role": "user", "content": followup}]
+            response = requests.post(KIMI_API_URL, headers=HEADERS, json=payload)
+            response.raise_for_status()
+            result = response.json()["choices"][0]["message"]["content"].strip()
+
+        return result
+
     except requests.exceptions.HTTPError as e:
         return f"❌ HTTP 错误：{e} - {response.text}"
     except Exception as e:
