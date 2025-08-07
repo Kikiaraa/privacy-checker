@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from prompt_builder import build_prompt
-from kimi_request import call_kimi
+from zhipu_request import call_zhipu
 
 app = Flask(__name__)
 
@@ -20,8 +20,8 @@ def ask():
     # 构造 prompt
     prompt = build_prompt(data_item, usage, kb_text)
 
-    # 调用 Kimi API
-    answer = call_kimi(prompt)
+    # 调用智谱清言GLM API
+    answer = call_zhipu(prompt)
 
     return jsonify({"answer": answer})
 

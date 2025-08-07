@@ -5,6 +5,9 @@
   <title>敏感个人信息判断</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    html {
+      font-size: 16px;
+    }
     * {
       box-sizing: border-box;
     }
@@ -13,30 +16,37 @@
       font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
       background-color: #f5f7fa;
       margin: 0;
-      padding: 2rem;
+      padding: 1.5rem;
       color: #333;
     }
 
     .container {
-      max-width: 700px;
-      background-color: #fff;
-      margin: 0 auto;
-      padding: 2rem;
+      max-width: 750px;
+      background: linear-gradient(180deg, #ffffff 0%, #f9f9f9 100%);
+      border: 1px solid #e1e1e1;
+      margin: 1.5rem auto;
+      padding: 3rem 2.5rem;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    }
+
+    .container + div {
+      margin-top: 2rem;
     }
 
     h1 {
       text-align: center;
       color: #2c3e50;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 2rem;
     }
 
     label {
       display: block;
-      margin-top: 1rem;
-      margin-bottom: 0.25rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
       font-weight: 600;
+      font-size: 1.125rem;
     }
 
     input, textarea {
@@ -52,36 +62,61 @@
     input:focus, textarea:focus {
       border-color: #409eff;
       outline: none;
+      box-shadow: 0 0 8px rgba(64, 158, 255, 0.3);
     }
 
     button {
       display: block;
-      margin-top: 2rem;
+      margin-top: 1.75rem;
       width: 100%;
       padding: 0.75rem;
       background-color: #409eff;
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 1.1rem;
+      font-size: 1.125rem;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     button:hover {
       background-color: #66b1ff;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
 
     #answer {
-      margin-top: 2rem;
-      padding: 1rem;
+      margin-top: 3rem;
+      padding: 2rem;
       background: #f0f4f8;
-      border-left: 5px solid #409eff;
+      border-left: 8px solid #409eff;
       border-radius: 6px;
       white-space: pre-wrap;
       font-size: 1rem;
-      min-height: 100px;
+      min-height: 200px;
+      max-height: 500px;
+      overflow-y: auto;
       font-family: 'Courier New', monospace;
+      line-height: 1.6;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    #answer::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #answer::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    #answer::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    #answer::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
     }
 
     @media (max-width: 768px) {
@@ -93,13 +128,37 @@
         padding: 1rem;
       }
     }
+
+    /* Disclaimer override */
+    .container .disclaimer {
+      margin-top: 2rem;
+      padding: 0.5rem 0;
+      opacity: 0.8;
+    }
+    .container .disclaimer hr {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 0.5rem 0;
+    }
+    .container .disclaimer p {
+      font-size: 0.85rem !important;
+      line-height: 1.6 !important;
+      color: #888 !important;
+      margin: 0.5rem 0;
+      font-weight: 400;
+    }
+    .container .disclaimer strong {
+      font-size: 0.85rem !important;
+      font-weight: 400;
+      color: #888 !important;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🔐 敏感个人信息判断</h1>
+    <h1>敏感个人信息识别仪</h1>
     
-    <label for="data_item">数据项：</label>
+    <label for="data_item">数据类型：</label>
     <input type="text" id="data_item" placeholder="例如：身份证号、手机号等" />
 
     <label for="usage">使用场景：</label>
@@ -107,7 +166,14 @@
 
     <button id="askBtn">🚀 提交分析</button>
 
-    <div id="answer">👈 输入后将在此显示判断结果</div>
+    <div id="answer">输入后将在此显示判断结果</div>
+
+    <div class="disclaimer">
+      <hr />
+      <p>⚠️ <strong>免责声明：
+        
+      </strong>本服务依托于生成式人工智能模型，请仔细甄别输出内容，可能出现错误或遗漏，仅供您参考。本服务不构成任何建议或承诺，您不应将输出的内容作为专业建议、商业用途或用于其他任何目的。若您需要相关专业意见，可以咨询汇业律师事务所，并在律师的指导下进行决策。</p>
+    </div>
   </div>
 
   <script>
@@ -121,7 +187,7 @@
       const usage = usageInput.value.trim();
 
       if (!data_item || !usage) {
-        alert("请填写数据项和使用场景");
+        alert("请填写数据类型和使用场景");
         return;
       }
 
